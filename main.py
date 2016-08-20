@@ -8,6 +8,8 @@ import json
 import requests
 import datetime
 
+import getopt
+import sys
 
 class office:
     def __init__(self,name,address, state):
@@ -41,11 +43,12 @@ class controller():
 
                     if received_len < 4096:
                         break
-                client.close()
                 print self.name + ": Command sent successfully."
+                client.close()
 
         except:
             print "Error: Unable to connect to controller."
+
 
 class ac:
     def __init__(self,name, state, temperature):
@@ -85,13 +88,13 @@ class sensor:
     def __init__(self, name, address):
         self.name = name
         self.address = address
-        self.currentTemp = 0
+        self.insideTemp = 0
         self.outsideTemp = 0
 
     def printTempStats(self):
-        print str(datetime.datetime.now())
+        print datetime.datetime.now().strftime('%Y-%M-%D %H:%M:%S')
         print "Outside Temperature: " + str(self.outsideTemp)
-        print "Inside Temperature: " + str(self.currentTemp)
+        print "Inside Temperature: " + str(self.insideTemp)
 
 
 def getWeather():
@@ -132,11 +135,37 @@ def receiveTemperature(sensor,queue):
 
     queue.put(sensorData['sensor'][0]['tempf'])
 
+def isNowInTimePeriod(startTime, endTime, nowTime):
+    startTime = startTime.time()
+    endTime = endTime.time()
+
+    if startTime < endTime:
+        return nowTime >= startTime and nowTime <= endTime
+    else: #Over midnight
+        return nowTime >= startTime or nowTime <= endTime
+
+def usage():
+    print "Options:"
+    print "-m, --mode <on|off>      Specify whether AC is already powered on."
 
 def main():
-    officeController = controller("Office", "192.168.1.248", "OFF", 4998)
+
+    officeController = controller("Office", "192.168.1.248", "Off", 4998)
     officeSensor = sensor("Office", "192.168.1.249")
     officeAC = ac("Office", "Off", 80)
+
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "m:", ["mode"])
+    except getopt.GetoptError as err:
+        print str(err)
+        sys.exit()
+
+    for o,a in opts:
+        if o in ("-m","--mode"):
+            if a == "on":
+                officeAC.state = "On"
+                print "[*] AC is already turned on."
+
 
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind(("0.0.0.0", 8080))
@@ -157,67 +186,60 @@ def main():
             officeSensor.thread.start()
 
             #Get inside and outside temperatures
-            officeSensor.currentTemp = q.get(1)
+            officeSensor.insideTemp = q.get(1)
             officeSensor.outsideTemp = getWeather()
 
             #Print inside and outside temperatures
             officeSensor.printTempStats()
 
+            now = datetime.datetime.now()
+            now_time = now.time()
 
-            if if datetime.now() >= time(22,0) and datetime.now() <= time(8,0):
-                if officeAC.mode == "Day":
+            if officeAC.state == "On" and change_counter <= 0:
+                #If between 10PM and 7AM set temperature to 82 and outside temp is greater than 73
+                if isNowInTimePeriod(datetime.datetime.strptime("22:00",'%H:%M'),datetime.datetime.strptime("7:00",'%H:%M'),now_time):
+                    print "Night time mode."
+                    if officeSensor.outsideTemp < float(86) and officeSensor.insideTemp < float(88):
                         officeAC.setTemperature(officeController, 82)
-                        officeAC.mode = "Night"
-                elif officeAC.mode == "Night":
-                    if officeSensor.outsideTemp <= float(73) & officeSensor.currentTemp < float(88):
+                        print "Action: Set temperature to 82."
+                        change_counter = 20
+                    # If Outside temp is below 74 degrees turn off AC if AC is on
+                    elif officeSensor.outsideTemp <= float(73) and officeSensor.insideTemp < float(84):
+                        officeAC.setPower(officeController,"Off")
+                        print "Action: Turn off."
+                        change_counter = 20
+                    # If inside temperature is high and outside temperature is high turn down temp setting
+                    elif officeSensor.outsideTemp >= float(90) and officeSensor.insideTemp >= float(88):
+                            officeAC.setTemperature(officeController, (officeAC.temperature - 2))
+                            print "Action: reduce temperature."
+                            change_counter = 20
+
+                #If day time, AC is on, but temperature is high, reduce thermostat
+                elif officeSensor.insideTemp >= float(88):
+                    officeAC.setTemperature(officeController,(officeAC.temperature - 2))
+                    change_counter = 20
+                    print "Action: Increase temperature setting to %" % (officeAC.temperature)
+                #If daytime, AC is on, but temperature is very low, increase thermostat
+                elif officeSensor.insideTemp <= 80 and officeAC.temperature >= float(82):
+                    officeAC.setTemperature(officeController,(officeAC.temperature + 2))
+                    change_counter = 20
+                    print "Action: Reduce temperature setting to %." % (officeAC.temperature)
+                elif officeSensor.outsideTemp <= float(73) and officeSensor.insideTemp < float(84):
+                        print "Action: Turn off AC."
                         officeAC.setPower(officeController,"Off")
                         change_counter = 20
-            else:
-
-
-
-
-            if officeAC.state == "On":
-                #If between 10PM and 7AM set temperature to 82 and outside temp is greater than 73
-                if datetime.now() >= time(22,0) and datetime.now() <= time(8,0):
-
-                elif
-                # If Outside temp is below 74 degrees turn off AC if AC is on
-                elif
-                    print "Action: Turn off."
-                    officeAC.setPower(officeController, "Off")
-                #If AC is on, but temperature is extremely low, reduce thermostat
-                elif officeSensor.currentTemp >= float(88):
-                    if change_counter > 0:
-                        officeAC.setTemperature(officeController, (officeAC.temperature - 2))
-                        change_counter = 20
-                        print "Action: Reduce temperature setting to %." % (officeAC.temperature)
-                elif officeSensor.currentTemp <= 80:
-                    if change_counter > 0:
-                        officeAC.setTemperature(officeController,(officeAC.temperature + 2))
-                        change_counter = 20
-                        print "Action: Reduce temperature setting to %." % (officeAC.temperature)
-
-
                 else:
                     print "Action: Nothing to do."
 
-            elif(officeSensor.outsideTemp < officeSensor.currentTemp):
-
-                if float(officeSensor.currentTemp) - float(officeSensor.outsideTemp) > float(5):
-                    if officeAC.state == "Off":
-                        officeAC.setPower(officeController, "On")
-                        print "Action: Turning on AC."
-                    elif officeAC.state == "On":
-                        print "Action: Leave AC on."
-
-                elif officeAC.state == "On":
-                    officeAC.setPower(officeController, "Off")
-                    print "Action: Turn off AC."
-                else:
-                        print "Action: Nothing to do."
-
-            elif officeAC.state == "Off":
+            if officeAC.state == "Off" and change_counter <= 0:
+                if officeSensor.outsideTemp > float(73) and officeSensor.insideTemp > float(86):
+                    print "Action: Turn on AC."
+                    officeAC.setPower(officeController,"On")
+                    change_counter = 20
+                elif officeSensor.insideTemp > float(88.5):
+                    print "Action: Turn on AC."
+                    officeAC.setPower(officeController,"On")
+                    change_counter = 20
 
             #If change_counter was previously set, decrement counter by 1 every minute
             if change_counter > 0:
@@ -225,8 +247,5 @@ def main():
                 print change_counter
 
             print "\n"
-        else:
-
-
 
 main()
