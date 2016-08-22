@@ -98,13 +98,17 @@ class sensor:
 
 
 def getWeather():
-    r = requests.get('http://api.openweathermap.org/data/2.5/weather?q=NewYork&APPID=7bc2fb26c56440d720e853b22d3e6781')
-    data = json.loads(r.text)
+    try:
+        r = requests.get('http://api.openweathermap.org/data/2.5/weather?q=NewYork&APPID=7bc2fb26c56440d720e853b22d3e6781')
+        data = json.loads(r.text)
 
-    kelvin = data['main']['temp']
+        kelvin = data['main']['temp']
 
-    fahrenheit = (kelvin * (9 / 5)) - 459.67
-    return fahrenheit
+        fahrenheit = (kelvin * (9 / 5)) - 459.67
+        return fahrenheit
+    except:
+        print "ERROR: Unable to get outside temperature."
+        return 75
 
 def receiveTemperature(sensor,queue):
     # Get temperature
@@ -198,32 +202,32 @@ def main():
             if officeAC.state == "On" and change_counter <= 0:
                 #If between 10PM and 7AM set temperature to 82 and outside temp is greater than 73
                 if isNowInTimePeriod(datetime.datetime.strptime("22:00",'%H:%M'),datetime.datetime.strptime("7:00",'%H:%M'),now_time):
-                    print "Night time mode."
+                    print("Night time mode.")
                     if officeSensor.outsideTemp < float(86) and officeSensor.insideTemp < float(88):
                         officeAC.setTemperature(officeController, 82)
-                        print "Action: Set temperature to 82."
+                        print("Action: Set temperature to 82.")
                         change_counter = 20
                     # If Outside temp is below 74 degrees turn off AC if AC is on
                     elif officeSensor.outsideTemp <= float(73) and officeSensor.insideTemp < float(84):
                         officeAC.setPower(officeController,"Off")
-                        print "Action: Turn off."
+                        print("Action: Turn off.")
                         change_counter = 20
                     # If inside temperature is high and outside temperature is high turn down temp setting
                     elif officeSensor.outsideTemp >= float(90) and officeSensor.insideTemp >= float(88):
                             officeAC.setTemperature(officeController, (officeAC.temperature - 2))
-                            print "Action: reduce temperature."
+                            print("Action: reduce temperature.")
                             change_counter = 20
 
                 #If day time, AC is on, but temperature is high, reduce thermostat
                 elif officeSensor.insideTemp >= float(88):
                     officeAC.setTemperature(officeController,(officeAC.temperature - 2))
                     change_counter = 20
-                    print "Action: Increase temperature setting to %" % (officeAC.temperature)
+                    print("Action: Increase temperature setting to %" % (officeAC.temperature))
                 #If daytime, AC is on, but temperature is very low, increase thermostat
                 elif officeSensor.insideTemp <= 80 and officeAC.temperature >= float(82):
                     officeAC.setTemperature(officeController,(officeAC.temperature + 2))
                     change_counter = 20
-                    print "Action: Reduce temperature setting to %." % (officeAC.temperature)
+                    print("Action: Reduce temperature setting to %." % (officeAC.temperature))
                 elif officeSensor.outsideTemp <= float(73) and officeSensor.insideTemp < float(84):
                         print "Action: Turn off AC."
                         officeAC.setPower(officeController,"Off")

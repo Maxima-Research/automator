@@ -43,4 +43,4 @@ Traceback (most recent call last):
     officeSensor.outsideTemp = getWeather()
   File "main.py", line 104, in getWeather
     kelvin = data['main']['temp']
-KeyError: 'main'
+KeyError: 'main'ap
