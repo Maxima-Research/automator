@@ -109,7 +109,7 @@ def getWeather():
     except:
         print "ERROR: Unable to get outside temperature."
         return 75
-
+d
 def receiveTemperature(sensor,queue):
     # Get temperature
 
