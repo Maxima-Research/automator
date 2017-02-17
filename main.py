@@ -12,7 +12,9 @@ import threading
 import time
 
 #Import Custom modules
-import room, device, controller
+from modules.room import Room
+from modules.device import Device
+from modules.controller import Controller
 
 def main():
     #Create array for GUI and Scheduler threads
@@ -25,10 +27,10 @@ def main():
     print('Creating ' + myRoom.name + ' Object.\n')
         
     #Create Device objects
-    for device in configuration.config['Devices']:
-        myRoom.devices.append(Device(devices))
-        print('Creating ...' + str(myRoom.devices[device]) + ' Object.\n')
-    
+    for device in configuration['Devices']:
+        myRoom.devices.append(Device(configuration['Devices'][device]))
+        print('Creating ... ' + str(myRoom.devices[device].keys) + ' Object.\n')
+
     #Create Controller object
 #    for controller in configuration.config['Controller']:
 #        myController = Controller(configuration.config('Controller')
