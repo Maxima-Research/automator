@@ -1,15 +1,17 @@
 class Controller():
-    def __init__(self, name, address, state, port):
-        self.name = name
-        self.address = address
-        self.port = port
-        self.state = state
+    def __init__(self, controllerConfig):
+        self.name = controllerConfig['name']
+        self.location = controllerConfig['location']
+        self.ip = controllerConfig['ip']
+        self.port = controllerConfig['port']
+        self.model = controllerConfig['model']
+        self.state = controllerConfig['state']
 
     def sendCommand(self, command):
         client = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 
         try:
-            client.connect((self.address,self.port))
+            client.connect((self.ip,self.port))
 
             client.send(command)
 
