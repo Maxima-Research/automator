@@ -16,10 +16,11 @@ from modules.room import Room
 from modules.device import Device
 from modules.controller import Controller
 from modules.activity import Activity
+from modules.server import Server
 
 def main():
     print('Launching Automator v1')
-    print('Loading configuration ...\n')
+    print('LOADING configuration ...\n')
 
     #Create array for GUI and Scheduler threads
     threads = []
@@ -37,20 +38,20 @@ def main():
 
     print('[Rooms]')
     #Create Room object
-    print('Creating ' + myRoom.name + ' in ' + myRoom.location + ' Room Object.\n')
+    print('CREATING ' + myRoom.name + ' in ' + myRoom.location + ' Room Object.\n')
 
     print('[Devices]')
     #Create Devices dictionary object
     for device in devices:
         myRoom.devices[device] = Device(devices[device])
 
-        print('Creating .... ' + str(myRoom.devices[device].name) + ' Object.')
+        print('CREATING .... ' + str(myRoom.devices[device].name) + ' Object.')
     print('\n')
 
     print('[Controllers]')
     #Create Controller object
     myController = Controller(controller)
-    print('Creating .... ' + str(myController.name) + ' Controller at ' + str(myController.ip) + '.')
+    print('CREATING .... ' + str(myController.name) + ' Controller at ' + str(myController.ip) + '.')
     print('\n')
 
 
@@ -59,21 +60,27 @@ def main():
     for activity in activities:
         myRoom.activities[activity] = Activity(activities[activity], myRoom.devices)
 
-        print('Creating .... ' + str(myRoom.activities[activity].name) + ' Activity.')
+        print('CREATING .... ' + str(myRoom.activities[activity].name) + ' Activity.')
     print('\n')
 
     #Check last state of room ... dirty/clean shutdown
     lastState = ConfigObj('last_state.ini')
     try:
         if lastState['state'] == 'on':
-            print('Recovering from dirty shutdown')
+            print('ERROR: Recovering from dirty shutdown.')
         else:
-            print('Starting clean start.')
+            print('ERROR: Unable to read last state ...')
     except Exception as error:
-        print('Clean start ...')
+        print('Clean start.')
+        myRoom.load('default')
+
+    print('\n')
+
+    #Launch control server
+    #myServer = Server('0.0.0.0', 8000)
+    #myServer.launch()
 
 
-    #Launch GUI thread
 
     #Launch Scheduler thread
 
