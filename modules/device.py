@@ -22,14 +22,11 @@ class Device():
             #Import commandset
             try:
                 for protocol in commands:
-                    print
-                    protocolType = commands[protocol]
-                    for mode in protocolType.items():
-                        print(mode)
-                        self.commands[protocol][mode] = {}
-                        for command, code in mode.items():
-                            print('LOADING ' + str(protocol).upper() + ' ' + command + ' ' + code)
-                            self.commands[protocol][mode][command] = code
+                    for options in commands[protocol].keys():
+                        self.commands[protocol][options] = {}
+                        for command, code in commands[protocol][options].items():
+                            print('LOADING ' + str(protocol).upper() + ' Command ' + str(options).upper() + ' ' + command + ' ' + code)
+                            self.commands[protocol][options][command] = code
             except Exception as error:
                 print('ERROR: Loading ' + protocol + ' commands: ' + str(error))
         except Exception as error:

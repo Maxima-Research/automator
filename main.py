@@ -44,9 +44,8 @@ def main():
     #Create Devices dictionary object
     for device in devices:
         myRoom.devices[device] = Device(devices[device])
-
         print('CREATING .... ' + str(myRoom.devices[device].name) + ' Object.')
-    print('\n')
+        print('\n')
 
     print('[Controllers]')
     #Create Controller object
