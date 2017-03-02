@@ -59,7 +59,7 @@ def main():
     for activity in activities:
         myRoom.activities[activity] = Activity(activities[activity], myRoom.devices)
 
-        print('CREATING .... ' + str(myRoom.activities[activity].name) + ' Activity.')
+        print('CREATING .... ' + str(myRoom.activities[activity].name) + ' Activity.\n')
     print('\n')
 
     #Check last state of room ... dirty/clean shutdown

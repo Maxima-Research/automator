@@ -8,8 +8,11 @@ class Activity():
         self.device = {}
 
         #Verify setting refers to a device
+
+        print(self.name)
         for device in activity:
-            #print(device)
             if device in devices:
+                self.device[device] = {}
                 for x,y in activity[device].items():
-                    self.device[x] = y
+                    self.device[device][x] = y
+                    print(device + ': ' + str(x) + ':' + str(y))

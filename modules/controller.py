@@ -5,7 +5,7 @@ class Controller():
         self.ip = controllerConfig['ip']
         self.port = controllerConfig['port']
         self.model = controllerConfig['model']
-        self.state = controllerConfig['state']
+        self.power = controllerConfig['power']
 
     def sendCommand(self, command):
         client = socket.socket(socket.AF_INET,socket.SOCK_STREAM)

@@ -5,11 +5,12 @@ class Device():
         self.name = properties['name']
         self.model = properties['model']
         self.type = properties['type']
-        self.state = properties['state']
+        self.power = properties['power']
 
         self.commands = {}
         self.commands['ir'] = {}
         self.commands['rs232'] = {}
+        self.commands['ip'] = {}
 
         try:
             print('LOADING .... ' + self.name + ' command set.')
