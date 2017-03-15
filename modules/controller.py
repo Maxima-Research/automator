@@ -1,11 +1,10 @@
-class Controller():
+class Controller(object):
     def __init__(self, controllerConfig):
-        self.name = controllerConfig['name']
-        self.location = controllerConfig['location']
-        self.ip = controllerConfig['ip']
-        self.port = controllerConfig['port']
-        self.model = controllerConfig['model']
-        self.power = controllerConfig['power']
+        for k, v in controllerConfig.items():
+            setattr(self, k, v)
+            print(str(k) + ': ' + str(v))
+
+        print('CREATING .... ' + str(self.name) + ' Controller at ' + str(self.ip) + '.\n')
 
     def sendCommand(self, command):
         client = socket.socket(socket.AF_INET,socket.SOCK_STREAM)

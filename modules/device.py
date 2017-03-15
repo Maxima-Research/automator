@@ -1,11 +1,10 @@
 from configobj import ConfigObj
 
-class Device():
+class Device(object):
     def __init__(self, properties):
-        self.name = properties['name']
-        self.model = properties['model']
-        self.type = properties['type']
-        self.power = properties['power']
+        for k, v in properties.items():
+            setattr(self, k, v)
+            print(str(k) + ': ' + str(v))
 
         self.commands = {}
         self.commands['ir'] = {}
@@ -32,3 +31,8 @@ class Device():
                 print('ERROR: Loading ' + protocol + ' commands: ' + str(error))
         except Exception as error:
             print('ERROR: Loading ' + self.name + ' commands:' + str(error))
+
+        print('CREATING .... ' + str(self.name) + ' Object. \n')
+
+    def __repr__(self):
+        return self.name

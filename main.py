@@ -25,6 +25,8 @@ def main():
     #Create array for GUI and Scheduler threads
     threads = []
 
+    print('[Rooms]')
+
     #Read config.ini for room configuration. If bad syntax end application cleanly.
     configuration = ConfigObj("config.ini")
     try:
@@ -36,44 +38,33 @@ def main():
         print('Unable to verify config.ini syntax. Please review and relaunch application.')
         exit()
 
-    print('[Rooms]')
-    #Create Room object
-    print('CREATING ' + myRoom.name + ' in ' + myRoom.location + ' Room Object.\n')
+    print('[Controllers]')
+    #Create Controller object
+    myController = Controller(controller)
 
     print('[Devices]')
     #Create Devices dictionary object
     for device in devices:
         myRoom.devices[device] = Device(devices[device])
-        print('CREATING .... ' + str(myRoom.devices[device].name) + ' Object.')
-        print('\n')
-
-    print('[Controllers]')
-    #Create Controller object
-    myController = Controller(controller)
-    print('CREATING .... ' + str(myController.name) + ' Controller at ' + str(myController.ip) + '.')
-    print('\n')
-
 
     print('[Activities]')
     #Create Activities object
     for activity in activities:
         myRoom.activities[activity] = Activity(activities[activity], myRoom.devices)
 
-        print('CREATING .... ' + str(myRoom.activities[activity].name) + ' Activity.\n')
-    print('\n')
-
     #Check last state of room ... dirty/clean shutdown
     lastState = ConfigObj('last_state.ini')
     try:
         if lastState['state'] == 'on':
-            print('ERROR: Recovering from dirty shutdown.')
+            print('ERROR: Recovering from dirty shutdown...')
         else:
             print('ERROR: Unable to read last state ...')
     except Exception as error:
         print('Clean start.')
-        myRoom.load('default')
+        myRoom.loadActivity('default',myController)
 
     print('\n')
+
 
     #Launch control server
     #myServer = Server('0.0.0.0', 8000)
