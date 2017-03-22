@@ -7,21 +7,13 @@ class Room(object):
         self.current_activity = None
         self.devices = {}
         self.activities = {}
+        self.controller = {}
 
         print('CREATING ' + self.name + ' in ' + self.location + ' Room Object.\n')
 
         # for device in self.devices:
         #     for device.state in self.devices[device]:
         #         if device.state == self.activities[activity][device]
-
-    def loadActivity(self, activity, controller):
-        if activity == 'default':
-            self.current_activity = self.default_activity
-        else:
-            self.current_activity = activity
-
-        for x in self.activities[self.current_activity][x].items():
-            print(x)
 
     def printActivities(self):
         print(self.activities)

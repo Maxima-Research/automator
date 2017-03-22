@@ -6,6 +6,7 @@ class Device(object):
             setattr(self, k, v)
             print(str(k) + ': ' + str(v))
 
+    def loadCommands(self):
         self.commands = {}
         self.commands['ir'] = {}
         self.commands['rs232'] = {}
@@ -32,7 +33,19 @@ class Device(object):
         except Exception as error:
             print('ERROR: Loading ' + self.name + ' commands:' + str(error))
 
-        print('CREATING .... ' + str(self.name) + ' Object. \n')
+        print('\n')
+
 
     def __repr__(self):
         return self.name
+
+    def __eq__(self, other):
+        if self.name == other.name:
+            for k in var(self):
+                if k == other.k:
+                    pass
+                else:
+                    return False
+            return True
+        else:
+            return False

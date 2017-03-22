@@ -18,6 +18,30 @@ from modules.controller import Controller
 from modules.activity import Activity
 from modules.server import Server
 
+
+def loadActivity(room, activity):
+    if activity == 'default':
+        current_activity = room.default_activity
+    else:
+        current_activity = activity
+
+    # print(self.current_activity)
+    # print(self.activities[self.current_activity].devices)
+    # print(self.devices['stb'].power)
+
+    for deviceStates in room.activities[current_activity].devices:
+        print(type(deviceStates))
+        for deviceList in room.devices.keys():
+            # If device names matches devices in Activity device list.
+            if deviceStates == deviceList:
+                # print(self.activities[activityID].devices[x].power)
+                # print(self.devices[y].power)
+                print(deviceList + ' ' + deviceStates)
+                # compare device attributes
+                if deviceStates == deviceList:
+                    print('they are the same')
+                #for
+
 def main():
     print('Launching Automator v1')
     print('LOADING configuration ...\n')
@@ -26,7 +50,6 @@ def main():
     threads = []
 
     print('[Rooms]')
-
     #Read config.ini for room configuration. If bad syntax end application cleanly.
     configuration = ConfigObj("config.ini")
     try:
@@ -40,12 +63,14 @@ def main():
 
     print('[Controllers]')
     #Create Controller object
-    myController = Controller(controller)
+    myRoom.controller = Controller(controller)
 
     print('[Devices]')
     #Create Devices dictionary object
     for device in devices:
         myRoom.devices[device] = Device(devices[device])
+        print('CREATING .... ' + str(myRoom.devices[device].name) + ' Object. \n')
+        myRoom.devices[device].loadCommands()
 
     print('[Activities]')
     #Create Activities object
@@ -61,10 +86,9 @@ def main():
             print('ERROR: Unable to read last state ...')
     except Exception as error:
         print('Clean start.')
-        myRoom.loadActivity('default',myController)
+        loadActivity(myRoom,'default')
 
     print('\n')
-
 
     #Launch control server
     #myServer = Server('0.0.0.0', 8000)
